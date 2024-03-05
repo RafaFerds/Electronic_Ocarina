@@ -10,9 +10,9 @@ class Button():
         pygame.draw.rect(surface, color,self.rect)
 
     # Draw Text
-    def text(self, txt, surface, size):
-        font = pygame.font.SysFont(None, size)
-        text_surf = font.render(txt, True, (0,0,0))
+    def text(self, txt, surface,  size, color =(0,0,0)):
+        font = pygame.font.SysFont('Calibri', size)
+        text_surf = font.render(txt, True, color)
         surface.blit(text_surf, text_surf.get_rect(center = self.rect.center))
 
     # Status Var
@@ -28,11 +28,24 @@ class Text():
         pygame.draw.rect(surface, bg_color,self.rect)
 
     # Draw Text
-    def text(self, txt, surface,  color, size):
+    def text(self, txt, surface,  size, color,  centered = True):
         font = pygame.font.SysFont(None, size)
-        text_surf = font.render(txt, True, color)
-        surface.blit(text_surf, text_surf.get_rect(center = self.rect.center))
+        text_splitted = txt.split('\n')
+        new_txt = []
+        x = self.rect.centerx 
+        y = self.rect.centery - self.rect.height / 3.5
+        for sentence in text_splitted:
+            text_surf = font.render(sentence, True, color)
+            if centered:
+                new_txt.append([text_surf, (text_surf.get_rect(center = self.rect.center))])
+            else:
+                new_txt.append([text_surf, (text_surf.get_rect(center = (x,y)))])
+                y+=size
+           
+        surface.blits(new_txt)
 
+    # Status Var
+    active = False
 
 class IconButton():
     # Constructor
