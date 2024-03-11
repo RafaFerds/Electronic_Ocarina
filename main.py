@@ -1,6 +1,41 @@
 import serial
 import pygame
-from menu import Button, Text, IconButton
+from pydub import AudioSegment
+from menu import Button, Text, IconButton, CicleButton, Mixer
+from pydub.playback import play
+AudioSegment.converter = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
+AudioSegment.ffmpeg = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
+
+#import ffmpeg_downloader as ffdl
+
+#file = "sounds/Zeldarian/C_root/G#.mp3"
+#sound = AudioSegment.from_mp3(file)
+
+#sound_beg = sound[:400]
+#sound_end = sound[-400:]
+#sound_mid = sound[200:800]
+#sound_mid_reverse = sound_mid.reverse()
+
+#sound_f = sound[:400] 
+
+
+#sound_final = sound_mid * 60
+#cont = 0
+
+#sound_f = sound_beg
+#sound_f = sound_f.append(sound_mid, crossfade = 100)
+#for n in range(0,300):
+    #sound_f = sound_f.append(sound_mid_reverse,crossfade = 5)
+    #sound_f = sound_f.append(sound_mid,crossfade = 16)
+    #sound_f.export("C:/Users/Casa1/Desktop/Sounds/"+str(cont) +" - A8.mp3", format = "mp3")
+    #sound_f += sound_mid
+#sound_f.append(sound_end, crossfade = 7)
+#sound_f = sound_f.fade_in(2000).fade_out(3000)
+#cont+=1
+#sound_f.export("C:/Users/Casa1/Desktop/Sounds/"+str(cont) +" - G#.mp3", format = "mp3")
+#+ sound[401:600] *60 + sound[-400:]
+
+#sound_f.export("C:/Users/Casa1/Desktop/Sounds/G#.mp3", format = "mp3")
 from serial_connect import SerialCOM
 pygame.init()
 
@@ -40,7 +75,7 @@ TITLE_HEIGHT = (SCREEN_HEIGHT-15 - ((BUTTON_HEIGHT+10)*4 ))
 TITLE_COLOR = pygame.Color('tomato')
 Title_game = Text((SCREEN_WIDTH - TITLE_WIDTH)/2, 0, TITLE_WIDTH, TITLE_HEIGHT)
 Title_game.draw(screen)
-Title_game.text("Brief Hero", screen, 150, TITLE_COLOR)
+Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
 
 
 # MENU PAGE
@@ -68,6 +103,35 @@ Error_msg = Text((SCREEN_WIDTH - POPUP_WIDTH)/2, (SCREEN_HEIGHT - POPUP_HEIGHT)/
 Error_msg_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, (SCREEN_HEIGHT)/2 + 50 , BUTTON_WIDTH, BUTTON_HEIGHT)
 
 
+# FREE PLAY PAGE
+FREEPLAY_BUTTON_SIZE = 100
+Red_btn = CicleButton(SCREEN_WIDTH*0.35, SCREEN_HEIGHT*0.55, FREEPLAY_BUTTON_SIZE, FREEPLAY_BUTTON_SIZE)
+Yellow_btn = CicleButton(SCREEN_WIDTH*0.6, SCREEN_HEIGHT*0.55, FREEPLAY_BUTTON_SIZE, FREEPLAY_BUTTON_SIZE)
+Blue_btn = CicleButton(SCREEN_WIDTH*0.35, SCREEN_HEIGHT*0.8, FREEPLAY_BUTTON_SIZE, FREEPLAY_BUTTON_SIZE)
+White_btn = CicleButton(SCREEN_WIDTH*0.6, SCREEN_HEIGHT*0.8, FREEPLAY_BUTTON_SIZE, FREEPLAY_BUTTON_SIZE)
+
+
+# Game sound mixer
+FREQUENCY_CHANNEL = 44100
+Mixer_game = Mixer()
+Mixer_game.mixer.init(FREQUENCY_CHANNEL)
+#Sound scale
+snd_G = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/G.mp3")
+snd_Ab = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/G#.mp3")
+snd_A = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/A.mp3")
+snd_Bb = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/A#.mp3")
+snd_B = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/B.mp3")
+snd_C = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/C.mp3")
+snd_D = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/D.mp3")
+snd_E = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/E.mp3")
+snd_F = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/F.mp3")
+snd_Gb8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/F#.mp3")
+snd_G8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/G8.mp3")
+snd_Ab8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/G8#.mp3")
+snd_A8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/A8.mp3")
+snd_Bb8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/A8#.mp3")
+snd_B8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/B8.mp3")
+snd_C8 = Mixer_game.mixer.Sound("sounds/Zeldarian/C_root/C8.mp3")
 
 #Create Game Version Info
 VER_WIDTH = 200
@@ -93,7 +157,143 @@ while run:
     key = pygame.key.get_pressed()
     if key[pygame.K_LCTRL] == True and key[pygame.K_m] == True :
         pygame.display.toggle_fullscreen() # The command "Ctrl + M" allows to toggle the window to fullscreen or not
+    if page == "Free":
+        if key[pygame.K_KP_1] == True:
+            Blue_btn.draw(screen, pygame.Color('darkblue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+        else:
+            Blue_btn.draw(screen, pygame.Color('blue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
 
+        if key[pygame.K_KP_3] == True:
+            White_btn.draw(screen, pygame.Color('gray40'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+        else:
+            White_btn.draw(screen, pygame.Color('white'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+
+        if key[pygame.K_KP_7] == True:
+            Red_btn.draw(screen, pygame.Color('darkred'), (FREEPLAY_BUTTON_SIZE/2)*0.8)
+        else:
+            Red_btn.draw(screen, pygame.Color('red'), (FREEPLAY_BUTTON_SIZE/2)*0.8)
+        
+        if key[pygame.K_KP_9] == True:
+            Yellow_btn.draw(screen, pygame.Color('gold4'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+        else:
+            Yellow_btn.draw(screen, pygame.Color('yellow'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+        
+        # Command for G
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_G.play(fade_ms=200)            
+        else:
+            snd_G.fadeout(200)  
+
+        # Command for Ab or G#
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_Ab.play(fade_ms=200)            
+        else:
+            snd_Ab.fadeout(200)   
+
+        # Command for A
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_A.play(fade_ms=200)            
+        else:
+            snd_A.fadeout(200) 
+
+        # Command for Bb or A#
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_Bb.play(fade_ms=200)            
+        else:
+            snd_Bb.fadeout(200) 
+
+        # Command for B
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_B.play(fade_ms=200)            
+        else:
+            snd_B.fadeout(200) 
+
+        # Command for C
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_C.play(fade_ms=200)            
+        else:
+            snd_C.fadeout(200)
+
+        # Command for D
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_D.play(fade_ms=200)            
+        else:
+            snd_D.fadeout(200)
+            
+        # Command for E
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_E.play(fade_ms=200)            
+        else:
+            snd_E.fadeout(200)
+
+        # Command for F
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_F.play(fade_ms=200)            
+        else:
+            snd_F.fadeout(200)
+
+        # Command for Gb8 or F#
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_Gb8.play(fade_ms=200)            
+        else:
+            snd_Gb8.fadeout(200)
+
+        # Command for G8
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_G8.play(fade_ms=200)            
+        else:
+            snd_G8.fadeout(200)
+
+        # Command for Ab8 or G8#
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_Ab8.play(fade_ms=200)            
+        else:
+            snd_Ab8.fadeout(200)
+
+        # Command for A8
+        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_A8.play(fade_ms=200)            
+        else:
+            snd_A8.fadeout(200)
+
+
+        # Command for Bb8 or A8#
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True: 
+            if not Mixer_game.mixer.get_busy():
+                snd_Bb8.play(fade_ms=200)            
+        else:
+            snd_Bb8.fadeout(200)
+
+        # Command for B8
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_B8.play(fade_ms=200)            
+        else:
+            snd_B8.fadeout(200)
+
+        # Command for C8
+        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+            if not Mixer_game.mixer.get_busy():
+                snd_C8.play(fade_ms=200)            
+        else:
+            snd_C8.fadeout(200)
+                
+        
+
+        
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -103,7 +303,7 @@ while run:
             # Events for Menu Page
             if page == "Menu":
                 # Event for Connect Button
-                if Connect_btn.rect.collidepoint(event.pos):
+                if Connect_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
                     Connect_btn.draw(screen, BTN_ONCLICK_COLOR)
                     Connect_btn.text("Connect Device", screen, 35)
                     Connect_btn.active = not Connect_btn.active
@@ -112,7 +312,7 @@ while run:
 
 
                 # Event for Calibration Button
-                if Calibration_btn.rect.collidepoint(event.pos):
+                if Calibration_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
                     Calibration_btn.draw(screen, BTN_ONCLICK_COLOR)
                     Calibration_btn.text("Calibration", screen, 35)
                     Calibration_btn.active = not Calibration_btn.active
@@ -121,7 +321,7 @@ while run:
 
 
                 # Event for Therapy Start Button
-                if StartTherapy_btn.rect.collidepoint(event.pos):
+                if StartTherapy_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
                     StartTherapy_btn.draw(screen, BTN_ONCLICK_COLOR)
                     StartTherapy_btn.text("Therapy Start", screen, 35)
                     StartTherapy_btn.active = not StartTherapy_btn.active
@@ -130,12 +330,19 @@ while run:
 
 
                 # Event for Free Play Button
-                if FreePlay_btn.rect.collidepoint(event.pos):
+                if FreePlay_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
                     FreePlay_btn.draw(screen, BTN_ONCLICK_COLOR)
                     FreePlay_btn.text("Free Play", screen, 35)
                     FreePlay_btn.active = not FreePlay_btn.active
                 else:
                     FreePlay_btn.active = False
+
+                if Error_msg_btn.rect.collidepoint(event.pos) and Error_msg.active == True:
+                    Error_msg_btn.draw(screen, BTN_ONCLICK_COLOR)
+                    Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))
+                    Error_msg_btn.active = not Error_msg_btn.active
+                else:
+                    Error_msg_btn.active = False    
 
             # Events for Connection Page
             elif page == "Connect":
@@ -182,18 +389,31 @@ while run:
 
             # Events for Calibration Page
             elif page == "Calibration":
-                #TO DO, Page for Device Calibration
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_ONCLICK_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = not Back_btn.active
+                else:
+                    Back_btn.active = False
+                
 
             # Events for Therapy Page
             elif page == "Therapy":
-                #TO DO, Page for Therapy Protocol
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_ONCLICK_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = not Back_btn.active
+                else:
+                    Back_btn.active = False
 
             # Events for Free Play Page
             elif page == "Free":
-                #TO DO, Page for Free Play the game
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_ONCLICK_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = not Back_btn.active
+                else:
+                    Back_btn.active = False
 
             else:
                 run = False
@@ -203,7 +423,7 @@ while run:
             # Events for Menu Page
             if page == "Menu":
                 # Event for Connect Button
-                if Connect_btn.rect.collidepoint(event.pos) and Connect_btn.active == True:
+                if Connect_btn.rect.collidepoint(event.pos) and Connect_btn.active == True and Error_msg.active == False:
                     Connect_btn.draw(screen, BTN_COLOR)
                     Connect_btn.text("Connect Device", screen, 35)
                     Connect_btn.active = False
@@ -223,7 +443,6 @@ while run:
                     Bg_list.draw(screen, pygame.Color('gray73') )
                     Refresh_btn.draw(screen, BTN_COLOR)
                     Refresh_btn.icon('images/refresh_button.png', 35, 35, screen)
-                    
                     page = "Connect"
                     break
                 else:
@@ -233,10 +452,27 @@ while run:
 
 
                 # Event for Calibration Button
-                if Calibration_btn.rect.collidepoint(event.pos) and Calibration_btn.active == True:
+                if Calibration_btn.rect.collidepoint(event.pos) and Calibration_btn.active == True and Error_msg.active == False:
                     Calibration_btn.draw(screen, BTN_COLOR)
                     Calibration_btn.text("Calibration", screen, 35)
                     Calibration_btn.active = False
+                    if Connection:
+                        screen.fill((0, 0, 0))
+                        Title_game.draw(screen)
+                        Title_game.text("Calibration Page", screen, 125, TITLE_COLOR, False)
+                        Description_List.draw(screen)
+                        Description_List.text("TODO text here:", screen, 30, pygame.Color("white"), False)
+                        Back_btn.draw(screen, BTN_COLOR)
+                        Back_btn.icon('images/back_button.png', 37, 35, screen)
+                        page = "Calibration"
+                        break
+                    else:
+                        Error_msg.draw(screen, pygame.Color('red4') )
+                        msg = "Please connect a Device first,\n then try to calibrate."
+                        Error_msg.text(msg, screen, 30, pygame.Color('white'), False)
+                        Error_msg.active = True
+                        Error_msg_btn.draw(screen, BTN_COLOR )
+                        Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))
                 else:
                     Calibration_btn.draw(screen, BTN_COLOR)
                     Calibration_btn.text("Calibration", screen, 35)
@@ -244,10 +480,27 @@ while run:
 
 
                 # Event for Therapy Start Button
-                if StartTherapy_btn.rect.collidepoint(event.pos) and StartTherapy_btn.active == True:
+                if StartTherapy_btn.rect.collidepoint(event.pos) and StartTherapy_btn.active == True and Error_msg.active == False:
                     StartTherapy_btn.draw(screen, BTN_COLOR)
                     StartTherapy_btn.text("Therapy Start", screen, 35)
                     StartTherapy_btn.active = False
+                    if Connection:
+                        screen.fill((0, 0, 0))
+                        Title_game.draw(screen)
+                        Title_game.text("Therapy Mode", screen, 125, TITLE_COLOR, False)
+                        Description_List.draw(screen)
+                        Description_List.text("TODO text here:", screen, 30, pygame.Color("white"), False)
+                        Back_btn.draw(screen, BTN_COLOR)
+                        Back_btn.icon('images/back_button.png', 37, 35, screen)
+                        page = "Therapy"
+                        break
+                    else:
+                        Error_msg.draw(screen, pygame.Color('red4') )
+                        msg = "Please connect a Device first,\n then start the therapy."
+                        Error_msg.text(msg, screen, 30, pygame.Color('white'), False)
+                        Error_msg.active = True
+                        Error_msg_btn.draw(screen, BTN_COLOR )
+                        Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))
                 else:
                     StartTherapy_btn.draw(screen, BTN_COLOR)
                     StartTherapy_btn.text("Therapy Start", screen, 35)
@@ -255,14 +508,72 @@ while run:
 
 
                 # Event for Free Play Button
-                if FreePlay_btn.rect.collidepoint(event.pos) and FreePlay_btn.active == True:
+                if FreePlay_btn.rect.collidepoint(event.pos) and FreePlay_btn.active == True and Error_msg.active == False:
                     FreePlay_btn.draw(screen, BTN_COLOR)
                     FreePlay_btn.text("Free Play", screen, 35)
                     FreePlay_btn.active = False
+                    if Connection:
+                        screen.fill((0, 0, 0))
+                        Title_game.draw(screen)
+                        Title_game.text("Free Play Mode", screen, 125, TITLE_COLOR, False)
+                        #Description_List.draw(screen)
+                        #Description_List.text("TODO text here:", screen, 30, pygame.Color("white"), False)
+                        Back_btn.draw(screen, BTN_COLOR)
+                        Back_btn.icon('images/back_button.png', 37, 35, screen)
+                        Red_btn.draw(screen, pygame.Color('darkred'), FREEPLAY_BUTTON_SIZE/2)
+                        White_btn.draw(screen, pygame.Color('gray40'),FREEPLAY_BUTTON_SIZE/2)
+                        Blue_btn.draw(screen, pygame.Color('darkblue'),FREEPLAY_BUTTON_SIZE/2)
+                        Yellow_btn.draw(screen, pygame.Color('gold4'),FREEPLAY_BUTTON_SIZE/2)
+                        Red_btn.draw(screen, pygame.Color('black'), (FREEPLAY_BUTTON_SIZE/2)*0.85)
+                        White_btn.draw(screen, pygame.Color('black'),(FREEPLAY_BUTTON_SIZE/2)*0.85)
+                        Blue_btn.draw(screen, pygame.Color('black'),(FREEPLAY_BUTTON_SIZE/2)*0.85)
+                        Yellow_btn.draw(screen, pygame.Color('black'),(FREEPLAY_BUTTON_SIZE/2)*0.85)
+                        Red_btn.draw(screen, pygame.Color('red'), (FREEPLAY_BUTTON_SIZE/2)*0.8)
+                        White_btn.draw(screen, pygame.Color('white'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+                        Blue_btn.draw(screen, pygame.Color('blue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+                        Yellow_btn.draw(screen, pygame.Color('yellow'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+                        page = "Free"
+                        break
+                    else:
+                        Error_msg.draw(screen, pygame.Color('red4') )
+                        msg = "Please connect a Device first,\n then you can start to play."
+                        Error_msg.text(msg, screen, 30, pygame.Color('white'), False)
+                        Error_msg.active = True
+                        Error_msg_btn.draw(screen, BTN_COLOR )
+                        Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))
                 else:
                     FreePlay_btn.draw(screen, BTN_COLOR)
                     FreePlay_btn.text("Free Play", screen, 35)
                     FreePlay_btn.active = False
+
+
+                if Error_msg.active:
+                    if Error_msg_btn.rect.collidepoint(event.pos) and  Error_msg_btn.active == True:
+                        screen.fill((0,0,0))
+                        Connect_btn.draw(screen, BTN_COLOR)
+                        Calibration_btn.draw(screen, BTN_COLOR)
+                        StartTherapy_btn.draw(screen, BTN_COLOR)
+                        FreePlay_btn.draw(screen, BTN_COLOR)
+                        Connect_btn.text("Connect Device", screen, 35)
+                        Calibration_btn.text("Calibration", screen, 35)
+                        StartTherapy_btn.text("Therapy Start",screen, 35)
+                        FreePlay_btn.text("Free Play", screen, 35)
+                        Title_game.draw(screen)
+                        Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
+                        Author_game.draw(screen)
+                        Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
+                        Version_game.draw(screen)
+                        Version_game.text("Version: " + ver, screen, 25, VER_COLOR)
+                        Error_msg.active = False
+                        Error_msg_btn.active = False
+                    else:
+                        Error_msg.draw(screen, pygame.Color('red4') )
+                        #msg = "Please connect a Device first,\n then try to calibrate."
+                        Error_msg.text(msg, screen, 30, pygame.Color('white'), False)
+                        Error_msg.active = True
+                        Error_msg_btn.active = False
+                        Error_msg_btn.draw(screen, BTN_COLOR )
+                        Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))   
 
             # Events for Connection Page
             elif page == "Connect":
@@ -280,7 +591,7 @@ while run:
                     StartTherapy_btn.text("Therapy Start",screen, 35)
                     FreePlay_btn.text("Free Play", screen, 35)
                     Title_game.draw(screen)
-                    Title_game.text("Brief Hero", screen, 150, TITLE_COLOR)
+                    Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
                     Author_game.draw(screen)
                     Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
                     Version_game.draw(screen)
@@ -356,7 +667,6 @@ while run:
                     Refresh_btn.active = False
                     Bg_list.draw(screen, pygame.Color('gray73') )
                     COM_Devices.clear()
-                    COM_list.result.append("COM3")
                     for n in range(len(COM_list.result)):
                         if ser.port == str(COM_list.result[n]):
                             COM_Devices.append(Text((SCREEN_WIDTH - LIST_WIDTH)/2 + 5, SCREEN_HEIGHT-25 - (BUTTON_HEIGHT+ LIST_HEIGHT +10) + ((LIST_HEIGHT*0.14 + 5)*n), LIST_WIDTH-10, LIST_HEIGHT*0.14))
@@ -415,18 +725,89 @@ while run:
 
             # Events for Calibration Page
             elif page == "Calibration":
-                #TO DO, Page for Device Calibration
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Back_btn.active == True and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
+                    screen.fill((0, 0, 0))
+                    Connect_btn.draw(screen, BTN_COLOR)
+                    Calibration_btn.draw(screen, BTN_COLOR)
+                    StartTherapy_btn.draw(screen, BTN_COLOR)
+                    FreePlay_btn.draw(screen, BTN_COLOR)
+                    Connect_btn.text("Connect Device", screen, 35)
+                    Calibration_btn.text("Calibration", screen, 35)
+                    StartTherapy_btn.text("Therapy Start",screen, 35)
+                    FreePlay_btn.text("Free Play", screen, 35)
+                    Title_game.draw(screen)
+                    Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
+                    Author_game.draw(screen)
+                    Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
+                    Version_game.draw(screen)
+                    Version_game.text("Version: " + ver, screen, 25, VER_COLOR)
+                    page = "Menu"
+                    break
+                else:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
+                
+                
 
             # Events for Therapy Page
             elif page == "Therapy":
-                #TO DO, Page for Therapy Protocol
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Back_btn.active == True and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
+                    screen.fill((0, 0, 0))
+                    Connect_btn.draw(screen, BTN_COLOR)
+                    Calibration_btn.draw(screen, BTN_COLOR)
+                    StartTherapy_btn.draw(screen, BTN_COLOR)
+                    FreePlay_btn.draw(screen, BTN_COLOR)
+                    Connect_btn.text("Connect Device", screen, 35)
+                    Calibration_btn.text("Calibration", screen, 35)
+                    StartTherapy_btn.text("Therapy Start",screen, 35)
+                    FreePlay_btn.text("Free Play", screen, 35)
+                    Title_game.draw(screen)
+                    Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
+                    Author_game.draw(screen)
+                    Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
+                    Version_game.draw(screen)
+                    Version_game.text("Version: " + ver, screen, 25, VER_COLOR)
+                    page = "Menu"
+                    break
+                else:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
 
             # Events for Free Play Page
             elif page == "Free":
-                #TO DO, Page for Free Play the game
-                True
+                if Back_btn.rect.collidepoint(event.pos) and Back_btn.active == True and Error_msg.active == False:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
+                    screen.fill((0, 0, 0))
+                    Connect_btn.draw(screen, BTN_COLOR)
+                    Calibration_btn.draw(screen, BTN_COLOR)
+                    StartTherapy_btn.draw(screen, BTN_COLOR)
+                    FreePlay_btn.draw(screen, BTN_COLOR)
+                    Connect_btn.text("Connect Device", screen, 35)
+                    Calibration_btn.text("Calibration", screen, 35)
+                    StartTherapy_btn.text("Therapy Start",screen, 35)
+                    FreePlay_btn.text("Free Play", screen, 35)
+                    Title_game.draw(screen)
+                    Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
+                    Author_game.draw(screen)
+                    Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
+                    Version_game.draw(screen)
+                    Version_game.text("Version: " + ver, screen, 25, VER_COLOR)
+                    page = "Menu"
+                    break
+                else:
+                    Back_btn.draw(screen, BTN_COLOR)
+                    Back_btn.icon('images/back_button.png', 37, 35, screen)
+                    Back_btn.active = False
 
             else:
                 run = False

@@ -64,3 +64,28 @@ class IconButton():
 
     # Status Var
     active = False
+
+
+class CicleButton():
+    # Constructor
+    def __init__(self, x, y, btn_w, btn_h):
+        self.rect = pygame.Rect(x, y, btn_w, btn_h)
+
+    # Draw Func
+    def draw(self, surface, color, size):
+        pygame.draw.circle(surface, color,self.rect.center, size )
+
+    # Draw Text
+    def text(self, txt, surface,  size, color =(0,0,0)):
+        font = pygame.font.SysFont('Calibri', size)
+        text_surf = font.render(txt, True, color)
+        surface.blit(text_surf, text_surf.get_rect(center = self.rect.center))
+
+    # Status Var
+    active = False
+
+class Mixer():
+
+    def __init__(self):
+        self.mixer = pygame.mixer
+        
