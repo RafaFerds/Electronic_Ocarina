@@ -1,5 +1,6 @@
 import serial
 import pygame
+from instrument import Ocarina
 from pydub import AudioSegment
 from menu import Button, Text, IconButton, CicleButton, Mixer
 from pydub.playback import play
@@ -58,6 +59,8 @@ ser = serial.Serial()
 Connection = False
 COM_list = SerialCOM()
 
+#Ocarina init
+Ocarina1 = Ocarina()
 
 #Create buttons 
 BUTTON_WIDTH = 300
@@ -144,10 +147,36 @@ Author_game = Text(10, SCREEN_HEIGHT - 10 - VER_HEIGHT, VER_WIDTH, VER_HEIGHT)
 Author_game.draw(screen)
 Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
 
+#Function for read serial
+
+def read_serial(serial):
+    serial.write(bytes(b'OK'))
+    val = serial.readline()
+    value = val.decode("utf-8")
+
+    yellow = int(value[(value.find("AMARELO: ") + 9):(value.find(" - BRANCO: "))])
+    white = int(value[(value.find(" - BRANCO: ") + 11):(value.find(" - VERMELHO: "))])
+    red = int(value[(value.find(" - VERMELHO: ") + 13):(value.find(" - AZUL: "))])
+    blue = int(value[(value.find(" - AZUL: ") + 9):(value.find(" - PRETO: "))])
+    black = int(value[(value.find(" - PRETO: ") + 10):(value.find(" - F: "))])
+    air_flag = int(value[(value.find(" - F: ") + 6):(value.find(" - PRESSAO: "))])
+    press = float(value[(value.find(" - PRESSAO: ") + 12):(value.find(" ."))])
+    
+    
+
+    #return value
+    return yellow, white, red, blue, black, air_flag, press
 
 
 #Flag for game pages
 page = "Menu"
+
+cond_yellow = False
+cond_white = False
+cond_red = False
+cond_blue = False
+cond_black = False
+cond_air = False
 
 #Game Loop
 run = True
@@ -155,115 +184,126 @@ while run:
     
     
     key = pygame.key.get_pressed()
+    
     if key[pygame.K_LCTRL] == True and key[pygame.K_m] == True :
         pygame.display.toggle_fullscreen() # The command "Ctrl + M" allows to toggle the window to fullscreen or not
     if page == "Free":
-        if key[pygame.K_KP_1] == True:
+        Ocarina1.yellow, Ocarina1.white, Ocarina1.red, Ocarina1.blue, Ocarina1.black, Ocarina1.airf, Ocarina1.press = read_serial(ser)
+        
+        cond_yellow = key[pygame.K_KP_9] or Ocarina1.yellow
+        cond_white = key[pygame.K_KP_3]  or Ocarina1.white
+        cond_red = key[pygame.K_KP_7] or Ocarina1.red
+        cond_blue = key[pygame.K_KP_1] or Ocarina1.blue
+        cond_black = Ocarina1.black
+        cond_air = key[pygame.K_KP_0] or Ocarina1.airf
+
+
+        if cond_blue:
             Blue_btn.draw(screen, pygame.Color('darkblue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
         else:
             Blue_btn.draw(screen, pygame.Color('blue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
 
-        if key[pygame.K_KP_3] == True:
+        if cond_white:
             White_btn.draw(screen, pygame.Color('gray40'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
         else:
             White_btn.draw(screen, pygame.Color('white'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
 
-        if key[pygame.K_KP_7] == True:
+        if cond_red:
             Red_btn.draw(screen, pygame.Color('darkred'), (FREEPLAY_BUTTON_SIZE/2)*0.8)
         else:
             Red_btn.draw(screen, pygame.Color('red'), (FREEPLAY_BUTTON_SIZE/2)*0.8)
         
-        if key[pygame.K_KP_9] == True:
+        if cond_yellow:
             Yellow_btn.draw(screen, pygame.Color('gold4'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
         else:
             Yellow_btn.draw(screen, pygame.Color('yellow'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
         
         # Command for G
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_G.play(fade_ms=200)            
         else:
             snd_G.fadeout(200)  
 
         # Command for Ab or G#
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (not cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_Ab.play(fade_ms=200)            
         else:
             snd_Ab.fadeout(200)   
 
         # Command for A
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_A.play(fade_ms=200)            
         else:
             snd_A.fadeout(200) 
 
         # Command for Bb or A#
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (not cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_Bb.play(fade_ms=200)            
         else:
             snd_Bb.fadeout(200) 
 
         # Command for B
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_B.play(fade_ms=200)            
         else:
             snd_B.fadeout(200) 
 
         # Command for C
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_C.play(fade_ms=200)            
         else:
             snd_C.fadeout(200)
 
         # Command for D
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_D.play(fade_ms=200)            
         else:
             snd_D.fadeout(200)
             
         # Command for E
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (not cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_E.play(fade_ms=200)            
         else:
             snd_E.fadeout(200)
 
         # Command for F
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == True and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (not cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_F.play(fade_ms=200)            
         else:
             snd_F.fadeout(200)
 
         # Command for Gb8 or F#
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_Gb8.play(fade_ms=200)            
         else:
             snd_Gb8.fadeout(200)
 
         # Command for G8
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_G8.play(fade_ms=200)            
         else:
             snd_G8.fadeout(200)
 
         # Command for Ab8 or G8#
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (not cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_Ab8.play(fade_ms=200)            
         else:
             snd_Ab8.fadeout(200)
 
         # Command for A8
-        if key[pygame.K_KP_1] == True and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (cond_blue) and (not cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_A8.play(fade_ms=200)            
         else:
@@ -271,21 +311,21 @@ while run:
 
 
         # Command for Bb8 or A8#
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == True and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True: 
+        if (not cond_blue) and (cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air): 
             if not Mixer_game.mixer.get_busy():
                 snd_Bb8.play(fade_ms=200)            
         else:
             snd_Bb8.fadeout(200)
 
         # Command for B8
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == True and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (not cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_B8.play(fade_ms=200)            
         else:
             snd_B8.fadeout(200)
 
         # Command for C8
-        if key[pygame.K_KP_1] == False and key[pygame.K_KP_3] == False and key[pygame.K_KP_7] == False and key[pygame.K_KP_9] == False and  key[pygame.K_KP_0] == True:
+        if (not cond_blue) and (not cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
             if not Mixer_game.mixer.get_busy():
                 snd_C8.play(fade_ms=200)            
         else:
@@ -297,6 +337,10 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+            try:
+                ser.close()
+            except:
+                continue
         # Events for Click on Mouse
         elif event.type == pygame.MOUSEBUTTONDOWN:
 
