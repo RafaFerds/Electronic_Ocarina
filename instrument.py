@@ -7,4 +7,4 @@ class Ocarina():
         self.black = 0
         self.airf = 0
         self.press = 0.00001
-        self.calib_press = 0.00
+        self.calib_press = 0.000

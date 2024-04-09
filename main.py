@@ -68,8 +68,8 @@ BUTTON_HEIGHT = 50
 BTN_COLOR = pygame.Color('tomato')
 BTN_ONCLICK_COLOR = pygame.Color('tomato3')
 LIST_WIDTH = SCREEN_WIDTH*0.4
-SENSOR_HEIGHT = SCREEN_HEIGHT*0.05
-SENSOR_WIDTH = SCREEN_WIDTH*0.4
+SENSOR_HEIGHT = SCREEN_HEIGHT*0.075
+SENSOR_WIDTH = SCREEN_WIDTH*0.1
 LIST_HEIGHT = SCREEN_HEIGHT*0.4
 POPUP_WIDTH = SCREEN_WIDTH*0.3
 POPUP_HEIGHT = SCREEN_WIDTH*0.2
@@ -80,7 +80,7 @@ TITLE_HEIGHT = (SCREEN_HEIGHT-15 - ((BUTTON_HEIGHT+10)*4 ))
 TITLE_COLOR = pygame.Color('tomato')
 Title_game = Text((SCREEN_WIDTH - TITLE_WIDTH)/2, 0, TITLE_WIDTH, TITLE_HEIGHT)
 Title_game.draw(screen)
-Title_game.text("Breathe Hero", screen, 150, TITLE_COLOR)
+Title_game.text("Wind Warriors", screen, 150, TITLE_COLOR)
 
 
 # MENU PAGE
@@ -110,7 +110,9 @@ Error_msg_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, (SCREEN_HEIGHT)/2 + 50 ,
 # CALIBRATION PAGE
 #Description_List =  Text((SCREEN_WIDTH - TITLE_WIDTH)/2, SCREEN_HEIGHT/2 - BUTTON_HEIGHT*2, TITLE_WIDTH, BUTTON_HEIGHT)
 StartCalib_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, SCREEN_HEIGHT-15 - (BUTTON_HEIGHT+10) , BUTTON_WIDTH, BUTTON_HEIGHT)
-Press_sens = Text((SCREEN_WIDTH - SENSOR_WIDTH)/2, SCREEN_HEIGHT-30 - (BUTTON_HEIGHT+ SENSOR_HEIGHT +10), SENSOR_WIDTH, SENSOR_HEIGHT)
+Press_sens = Text((SCREEN_WIDTH - SENSOR_WIDTH)/2-SENSOR_WIDTH, SCREEN_HEIGHT-150 - (BUTTON_HEIGHT+ SENSOR_HEIGHT +10), SENSOR_WIDTH, SENSOR_HEIGHT)
+Press_sens_val = Text((SCREEN_WIDTH - SENSOR_WIDTH)/2, SCREEN_HEIGHT-150 - (BUTTON_HEIGHT+ SENSOR_HEIGHT +10), SENSOR_WIDTH, SENSOR_HEIGHT)
+Press_sens_unit = Text((SCREEN_WIDTH - SENSOR_WIDTH)/2+SENSOR_WIDTH, SCREEN_HEIGHT-150 - (BUTTON_HEIGHT+ SENSOR_HEIGHT +10), SENSOR_WIDTH, SENSOR_HEIGHT)
 Calib_flag = False
 #Refresh_btn = IconButton(SCREEN_WIDTH/2 + LIST_WIDTH/2 + 15, SCREEN_HEIGHT-30 - (BUTTON_HEIGHT+ LIST_HEIGHT +10), 40, 40)
 #COM_Devices = []
@@ -181,14 +183,16 @@ def read_sens(serial):
     val = serial.readline()
     value = val.decode("utf-8")
     
-    if(value.find("- OK")==-1):
+    if(value.find("- OK")!=-1):
         state = False
         pass
     else:
-        Ocarina1.calib_press = float(value[(value.find("PRESSAO: ") + 9):(value.find(" ."))])
         state = True
+        if(value.find("AMARELO")==-1):
+            Ocarina1.calib_press = float(value[(value.find("PRESSAO: ") + 9):(value.find(" ."))])
+            
     
-    print(Ocarina1.calib_press)
+    print(value)
 
     #return value
     return state
@@ -230,8 +234,26 @@ while run:
     
     if key[pygame.K_LCTRL] == True and key[pygame.K_m] == True :
         pygame.display.toggle_fullscreen() # The command "Ctrl + M" allows to toggle the window to fullscreen or not
-    if page == "Calibration" and Calib_flag:
-        Calib_flag = read_sens(ser)
+    if page == "Calibration":
+        if Calib_flag:
+            Calib_flag = read_sens(ser)
+            StartCalib_btn.draw(screen, pygame.Color('gray50'))
+            StartCalib_btn.text("Start Calibration", screen, 35, pygame.Color('white'))
+            StartCalib_btn.active = False
+            Press_sens_val.draw(screen, pygame.Color('gray73') )
+            Press_sens_val.text(str(Ocarina1.calib_press),screen, 35, pygame.Color('black'))
+            if not Calib_flag:
+                StartCalib_btn.draw(screen, BTN_COLOR)
+                StartCalib_btn.text("Start Calibration", screen, 35)
+
+        
+
+        
+        
+        
+
+        
+
     if page == "Free":
         Ocarina1.yellow, Ocarina1.white, Ocarina1.red, Ocarina1.blue, Ocarina1.black, Ocarina1.airf, Ocarina1.press = read_serial(ser)
         
@@ -519,9 +541,13 @@ while run:
                     Back_btn.active = False
 
                 if StartCalib_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
-                    StartCalib_btn.draw(screen, BTN_ONCLICK_COLOR)
-                    StartCalib_btn.text("Start Calibration", screen, 35)
-                    StartCalib_btn.active = not StartCalib_btn.active
+                    if Calib_flag:
+                        StartCalib_btn.draw(screen, pygame.Color('gray50'))
+                        StartCalib_btn.text("Start Calibration", screen, 35, pygame.Color('white'))
+                    else:
+                        StartCalib_btn.draw(screen, BTN_ONCLICK_COLOR)
+                        StartCalib_btn.text("Start Calibration", screen, 35)
+                        StartCalib_btn.active = not StartCalib_btn.active
                 else:
                     StartCalib_btn.active = False
                 
@@ -593,7 +619,12 @@ while run:
                         Description_List.text("Press the black button of your Ocarina first, then click on the button start", screen, 30, pygame.Color("white"), False)
                         Back_btn.draw(screen, BTN_COLOR)
                         Back_btn.icon('images/back_button.png', 37, 35, screen)
-                        Press_sens.draw(screen, pygame.Color('gray73') )
+                        Press_sens.draw(screen)
+                        Press_sens.text('Pressure: ',screen, 35, TITLE_COLOR)
+                        Press_sens_val.draw(screen, pygame.Color('gray73') )
+                        Press_sens_val.text(str(Ocarina1.calib_press),screen, 35, pygame.Color('black'))
+                        Press_sens_unit.draw(screen)
+                        Press_sens_unit.text('mmH2O',screen, 35, TITLE_COLOR)
                         StartCalib_btn.draw(screen, BTN_COLOR)
                         StartCalib_btn.text("Start Calibration", screen, 35)
                         page = "Calibration"
@@ -891,10 +922,14 @@ while run:
                     StartCalib_btn.text("Start Calibration", screen, 35)
                     StartCalib_btn.active = False
                     Calib_flag = True
-                    ser.write(bytes(b'CALIB\n'))
+                    ser.write(bytes(b'CAL\n'))
                 else:
-                    StartCalib_btn.draw(screen, BTN_COLOR)
-                    StartCalib_btn.text("Start Calibration", screen, 35)
+                    if Calib_flag:
+                        StartCalib_btn.draw(screen, pygame.Color('gray50'))
+                        StartCalib_btn.text("Start Calibration", screen, 35, pygame.Color('white'))
+                    else:
+                        StartCalib_btn.draw(screen, BTN_COLOR)
+                        StartCalib_btn.text("Start Calibration", screen, 35)
                     StartCalib_btn.active = False
 
 
