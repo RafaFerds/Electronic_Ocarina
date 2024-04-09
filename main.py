@@ -1,11 +1,11 @@
 import serial
 import pygame
 from instrument import Ocarina
-from pydub import AudioSegment
+#from pydub import AudioSegment
 from menu import Button, Text, IconButton, CicleButton, Mixer
 from pydub.playback import play
-AudioSegment.converter = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
-AudioSegment.ffmpeg = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
+#AudioSegment.converter = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
+#AudioSegment.ffmpeg = "C:/Users/Casa1/AppData/Local/ffmpegio/ffmpeg-downloader/ffmpeg/bin/ffmpeg.exe"
 
 #import ffmpeg_downloader as ffdl
 
@@ -68,6 +68,8 @@ BUTTON_HEIGHT = 50
 BTN_COLOR = pygame.Color('tomato')
 BTN_ONCLICK_COLOR = pygame.Color('tomato3')
 LIST_WIDTH = SCREEN_WIDTH*0.4
+SENSOR_HEIGHT = SCREEN_HEIGHT*0.05
+SENSOR_WIDTH = SCREEN_WIDTH*0.4
 LIST_HEIGHT = SCREEN_HEIGHT*0.4
 POPUP_WIDTH = SCREEN_WIDTH*0.3
 POPUP_HEIGHT = SCREEN_WIDTH*0.2
@@ -105,6 +107,15 @@ COM_Devices = []
 Error_msg = Text((SCREEN_WIDTH - POPUP_WIDTH)/2, (SCREEN_HEIGHT - POPUP_HEIGHT)/2, POPUP_WIDTH, POPUP_HEIGHT)
 Error_msg_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, (SCREEN_HEIGHT)/2 + 50 , BUTTON_WIDTH, BUTTON_HEIGHT)
 
+# CALIBRATION PAGE
+#Description_List =  Text((SCREEN_WIDTH - TITLE_WIDTH)/2, SCREEN_HEIGHT/2 - BUTTON_HEIGHT*2, TITLE_WIDTH, BUTTON_HEIGHT)
+StartCalib_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, SCREEN_HEIGHT-15 - (BUTTON_HEIGHT+10) , BUTTON_WIDTH, BUTTON_HEIGHT)
+Press_sens = Text((SCREEN_WIDTH - SENSOR_WIDTH)/2, SCREEN_HEIGHT-30 - (BUTTON_HEIGHT+ SENSOR_HEIGHT +10), SENSOR_WIDTH, SENSOR_HEIGHT)
+Calib_flag = False
+#Refresh_btn = IconButton(SCREEN_WIDTH/2 + LIST_WIDTH/2 + 15, SCREEN_HEIGHT-30 - (BUTTON_HEIGHT+ LIST_HEIGHT +10), 40, 40)
+#COM_Devices = []
+#Error_msg = Text((SCREEN_WIDTH - POPUP_WIDTH)/2, (SCREEN_HEIGHT - POPUP_HEIGHT)/2, POPUP_WIDTH, POPUP_HEIGHT)
+#Error_msg_btn = Button((SCREEN_WIDTH - BUTTON_WIDTH)/2, (SCREEN_HEIGHT)/2 + 50 , BUTTON_WIDTH, BUTTON_HEIGHT)
 
 # FREE PLAY PAGE
 FREEPLAY_BUTTON_SIZE = 100
@@ -150,10 +161,9 @@ Author_game.text("Dev: " + author, screen, 25, VER_COLOR)
 #Function for read serial
 
 def read_serial(serial):
-    serial.write(bytes(b'OK'))
     val = serial.readline()
     value = val.decode("utf-8")
-
+    #print(value)
     yellow = int(value[(value.find("AMARELO: ") + 9):(value.find(" - BRANCO: "))])
     white = int(value[(value.find(" - BRANCO: ") + 11):(value.find(" - VERMELHO: "))])
     red = int(value[(value.find(" - VERMELHO: ") + 13):(value.find(" - AZUL: "))])
@@ -167,10 +177,43 @@ def read_serial(serial):
     #return value
     return yellow, white, red, blue, black, air_flag, press
 
+def read_sens(serial):
+    val = serial.readline()
+    value = val.decode("utf-8")
+    
+    if(value.find("- OK")==-1):
+        state = False
+        pass
+    else:
+        Ocarina1.calib_press = float(value[(value.find("PRESSAO: ") + 9):(value.find(" ."))])
+        state = True
+    
+    print(Ocarina1.calib_press)
+
+    #return value
+    return state
 
 #Flag for game pages
 page = "Menu"
 
+#Flag for what note is playing
+G_Play = False
+Ab_Play = False
+A_Play = False
+Bb_Play = False
+B_Play = False
+C_Play = False
+D_Play = False
+E_Play = False
+F_Play = False
+Gb8_Play = False
+G8_Play = False
+Ab8_Play = False
+A8_Play = False
+Bb8_Play = False
+B8_Play = False
+C8_Play = False
+#Flag for buttons
 cond_yellow = False
 cond_white = False
 cond_red = False
@@ -187,6 +230,8 @@ while run:
     
     if key[pygame.K_LCTRL] == True and key[pygame.K_m] == True :
         pygame.display.toggle_fullscreen() # The command "Ctrl + M" allows to toggle the window to fullscreen or not
+    if page == "Calibration" and Calib_flag:
+        Calib_flag = read_sens(ser)
     if page == "Free":
         Ocarina1.yellow, Ocarina1.white, Ocarina1.red, Ocarina1.blue, Ocarina1.black, Ocarina1.airf, Ocarina1.press = read_serial(ser)
         
@@ -220,116 +265,149 @@ while run:
         
         # Command for G
         if (not cond_blue) and (cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_G.play(fade_ms=200)            
+            if not G_Play:
+                snd_G.play(fade_ms=50)
+                G_Play=True          
         else:
-            snd_G.fadeout(200)  
+            snd_G.fadeout(100)
+            G_Play=False 
 
         # Command for Ab or G#
         if (not cond_blue) and (not cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_Ab.play(fade_ms=200)            
+            if not Ab_Play:
+                snd_Ab.play(fade_ms=50)
+                Ab_Play=True      
         else:
-            snd_Ab.fadeout(200)   
+            snd_Ab.fadeout(100)
+            Ab_Play=False   
 
         # Command for A
         if (not cond_blue) and (cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_A.play(fade_ms=200)            
+            if not A_Play:
+                snd_A.play(fade_ms=50) 
+                A_Play=True           
         else:
-            snd_A.fadeout(200) 
+            snd_A.fadeout(100)
+            A_Play=False  
 
         # Command for Bb or A#
         if (not cond_blue) and (not cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_Bb.play(fade_ms=200)            
+            if not Bb_Play:
+                snd_Bb.play(fade_ms=50)
+                Bb_Play=True           
         else:
-            snd_Bb.fadeout(200) 
+            snd_Bb.fadeout(100)
+            Bb_Play=False
 
         # Command for B
         if (not cond_blue) and (cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_B.play(fade_ms=200)            
+            if not B_Play:
+                snd_B.play(fade_ms=50)
+                B_Play=True            
         else:
-            snd_B.fadeout(200) 
+            snd_B.fadeout(100) 
+            B_Play=False
 
         # Command for C
         if (cond_blue) and (cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_C.play(fade_ms=200)            
+            if not C_Play:
+                snd_C.play(fade_ms=50)
+                C_Play=True            
         else:
-            snd_C.fadeout(200)
+            snd_C.fadeout(100)
+            C_Play=False
 
         # Command for D
         if (cond_blue) and (cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_D.play(fade_ms=200)            
+            if not D_Play:
+                snd_D.play(fade_ms=50)
+                D_Play=True
         else:
-            snd_D.fadeout(200)
+            snd_D.fadeout(100)
+            D_Play=False
             
         # Command for E
         if (cond_blue) and (not cond_white) and (cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_E.play(fade_ms=200)            
+            if not E_Play:
+                snd_E.play(fade_ms=50)
+                E_Play=True
+
         else:
-            snd_E.fadeout(200)
+            snd_E.fadeout(100)
+            E_Play=False
 
         # Command for F
         if (cond_blue) and (not cond_white) and (cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_F.play(fade_ms=200)            
+            if not F_Play:
+                snd_F.play(fade_ms=50)
+                F_Play=True         
         else:
-            snd_F.fadeout(200)
+            snd_F.fadeout(100)
+            F_Play=False
 
         # Command for Gb8 or F#
         if (cond_blue) and (cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_Gb8.play(fade_ms=200)            
+            if not Gb8_Play:
+                snd_Gb8.play(fade_ms=50)
+                Gb8_Play=True         
         else:
-            snd_Gb8.fadeout(200)
+            snd_Gb8.fadeout(100)
+            Gb8_Play=False
 
         # Command for G8
         if (cond_blue) and (cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_G8.play(fade_ms=200)            
+            if not G8_Play:
+                snd_G8.play(fade_ms=50)     
+                G8_Play=True       
         else:
-            snd_G8.fadeout(200)
+            snd_G8.fadeout(100)
+            G8_Play=False
 
         # Command for Ab8 or G8#
         if (cond_blue) and (not cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_Ab8.play(fade_ms=200)            
+            if not Ab8_Play:
+                snd_Ab8.play(fade_ms=50)
+                Ab8_Play=True           
         else:
-            snd_Ab8.fadeout(200)
+            snd_Ab8.fadeout(100)
+            Ab8_Play=False 
 
         # Command for A8
         if (cond_blue) and (not cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_A8.play(fade_ms=200)            
+            if not A8_Play:
+                snd_A8.play(fade_ms=50)
+                A8_Play=True            
         else:
-            snd_A8.fadeout(200)
+            snd_A8.fadeout(100)
+            A8_Play=False 
 
 
         # Command for Bb8 or A8#
         if (not cond_blue) and (cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air): 
-            if not Mixer_game.mixer.get_busy():
-                snd_Bb8.play(fade_ms=200)            
+            if not Bb8_Play:
+                snd_Bb8.play(fade_ms=50)
+                Bb8_Play=True         
         else:
-            snd_Bb8.fadeout(200)
+            snd_Bb8.fadeout(100)
+            Bb8_Play=False
 
         # Command for B8
         if (not cond_blue) and (not cond_white) and (not cond_red) and (cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_B8.play(fade_ms=200)            
+            if not B8_Play:
+                snd_B8.play(fade_ms=50)
+                B8_Play=True            
         else:
-            snd_B8.fadeout(200)
+            snd_B8.fadeout(100)
+            B8_Play=False
 
         # Command for C8
         if (not cond_blue) and (not cond_white) and (not cond_red) and (not cond_yellow) and  (cond_air):
-            if not Mixer_game.mixer.get_busy():
-                snd_C8.play(fade_ms=200)            
+            if not C8_Play:
+                snd_C8.play(fade_ms=50)
+                C8_Play=True           
         else:
-            snd_C8.fadeout(200)
+            snd_C8.fadeout(100)
+            C8_Play=False
                 
         
 
@@ -439,6 +517,13 @@ while run:
                     Back_btn.active = not Back_btn.active
                 else:
                     Back_btn.active = False
+
+                if StartCalib_btn.rect.collidepoint(event.pos) and Error_msg.active == False:
+                    StartCalib_btn.draw(screen, BTN_ONCLICK_COLOR)
+                    StartCalib_btn.text("Start Calibration", screen, 35)
+                    StartCalib_btn.active = not StartCalib_btn.active
+                else:
+                    StartCalib_btn.active = False
                 
 
             # Events for Therapy Page
@@ -505,9 +590,12 @@ while run:
                         Title_game.draw(screen)
                         Title_game.text("Calibration Page", screen, 125, TITLE_COLOR, False)
                         Description_List.draw(screen)
-                        Description_List.text("TODO text here:", screen, 30, pygame.Color("white"), False)
+                        Description_List.text("Press the black button of your Ocarina first, then click on the button start", screen, 30, pygame.Color("white"), False)
                         Back_btn.draw(screen, BTN_COLOR)
                         Back_btn.icon('images/back_button.png', 37, 35, screen)
+                        Press_sens.draw(screen, pygame.Color('gray73') )
+                        StartCalib_btn.draw(screen, BTN_COLOR)
+                        StartCalib_btn.text("Start Calibration", screen, 35)
                         page = "Calibration"
                         break
                     else:
@@ -516,7 +604,7 @@ while run:
                         Error_msg.text(msg, screen, 30, pygame.Color('white'), False)
                         Error_msg.active = True
                         Error_msg_btn.draw(screen, BTN_COLOR )
-                        Error_msg_btn.text("OK", screen, 30, pygame.Color('white'))
+                        Error_msg_btn.text("Connect", screen, 35)
                 else:
                     Calibration_btn.draw(screen, BTN_COLOR)
                     Calibration_btn.text("Calibration", screen, 35)
@@ -576,6 +664,7 @@ while run:
                         White_btn.draw(screen, pygame.Color('white'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
                         Blue_btn.draw(screen, pygame.Color('blue'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
                         Yellow_btn.draw(screen, pygame.Color('yellow'),(FREEPLAY_BUTTON_SIZE/2)*0.8)
+                        ser.write(bytes(b'DATA'))
                         page = "Free"
                         break
                     else:
@@ -657,7 +746,9 @@ while run:
                         try: 
                             if COM_Devices[n].active:
                                 ser.port = str(COM_list.result[n])
-                                ser.open()   
+                                ser.baudrate = 74880
+                                ser.open()
+                                
 
                         except:
                             
@@ -795,7 +886,17 @@ while run:
                     Back_btn.icon('images/back_button.png', 37, 35, screen)
                     Back_btn.active = False
                 
-                
+                if StartCalib_btn.rect.collidepoint(event.pos) and StartCalib_btn.active == True and  Error_msg.active == False:
+                    StartCalib_btn.draw(screen, BTN_COLOR)
+                    StartCalib_btn.text("Start Calibration", screen, 35)
+                    StartCalib_btn.active = False
+                    Calib_flag = True
+                    ser.write(bytes(b'CALIB\n'))
+                else:
+                    StartCalib_btn.draw(screen, BTN_COLOR)
+                    StartCalib_btn.text("Start Calibration", screen, 35)
+                    StartCalib_btn.active = False
+
 
             # Events for Therapy Page
             elif page == "Therapy":
